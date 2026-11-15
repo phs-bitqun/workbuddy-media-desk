@@ -1,0 +1,26 @@
+name: test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: node ${{ matrix.node }} · ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # Windows 不在此列：技能装法依赖 bash + ln -s，runner 上的 Git Bash 不保证软链，
+        # 装了也是假绿。Windows 走专家包（PowerShell 拷贝），见 INSTALL.md。
+        os: [ubuntu-latest, macos-latest]
+        node: ['20', '22']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: 跑测试
+        run: node --test tests/*.test.mjs

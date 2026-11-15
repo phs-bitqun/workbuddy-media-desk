@@ -158,6 +158,8 @@ rm -rf ~/.workbuddy/plugins/marketplaces/my-experts/plugins/workbuddy-media-desk
 
 ## 附录 · 装成技能（不要专家卡）
 
+> **Windows 用户注意**：这条路依赖 `bash` 和软链（`ln -sfn`），在原生 Windows 上不保证可用（可能需要开发者模式或管理员权限）。Windows 请走上面的专家包装法（PowerShell 拷贝，不需要软链），或者用 WSL。
+
 不想在「专家」里多一张卡、只想在任何会话里随手调用，用这条路：
 
 ```bash
