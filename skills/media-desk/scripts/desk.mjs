@@ -609,7 +609,7 @@ const commands = {
   format <script|article>                 切换体裁
   style list | style use <id> | style show <id> | style add --file s.json
   rule list | rule add --name N --rule R [--active] | rule on/off <id> | rule rm <id>
-  metric add --platform P [--item id] [--views n] [--likes n] ... 
+  metric add --platform P [--item id] [--views n] [--likes n] ...
   metric import --file data.csv | metric list
   insights                                复盘汇总
   propose                                 提炼规则提案

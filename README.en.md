@@ -166,7 +166,7 @@ workbuddy-media-desk/             # the whole folder is the distributable packag
 │       ├── app/                  # interface: index.html + app.css + app.js
 │       └── lib/                  # store / ops / insights / render / server / export
 ├── install.sh                    # one-step installer for the skill route
-├── tests/                        # node --test, 47 tests, zero dependencies
+├── tests/                        # node --test: 56 tests (47 behavioural + 9 static)
 ├── docs/                         # screenshots and the landing page
 ├── .github/ISSUE_TEMPLATE/       # install problem / feature request
 ├── INSTALL.md · README.md · LICENSE
@@ -212,7 +212,12 @@ These exist because each one bit us once:
 node --test tests/*.test.mjs
 ```
 
-47 tests, zero dependencies, Node's built-in runner. Covers cross-process writes, lock takeover, file modes, the installer's refusal paths, CSV parsing (BOM/quotes/bad rows), platform grouping, cumulative-data dedupe, export collisions, and HTTP auth plus path traversal.
+56 tests, zero dependencies, Node's built-in runner. CI runs ubuntu / macOS / Windows × Node 20/22.
+
+- **47 behavioural tests**: cross-process writes, lock takeover, file modes, the installer's refusal paths, CSV parsing (BOM/quotes/bad rows), platform grouping, cumulative-data dedupe, export collisions, HTTP auth and path traversal.
+- **9 static checks**: syntax, relative imports pointing at real files, paths declared in `plugin.json`, broken doc links, landing-page images, CRLF/BOM/trailing whitespace/tabs, no `console.log` in library code, no committed secrets, `install.sh` executable bit.
+
+> No ESLint: the package is deliberately dependency-free, and these are the classes of problem that actually bite. The rules live in `tests/lint.test.mjs` — add one when you learn something new.
 
 ## Feedback
 

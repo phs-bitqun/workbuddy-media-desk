@@ -164,7 +164,7 @@ workbuddy-media-desk/             # 整个目录就是一个可分发的包
 │       ├── app/                  # 交互界面：index.html + app.css + app.js
 │       └── lib/                  # 存储 / 操作 / 复盘 / 渲染 / 服务 / 导出
 ├── install.sh                    # 技能装法的一键脚本
-├── tests/                        # node --test，47 项，零依赖
+├── tests/                        # node --test，56 项（47 行为 + 9 静态检查）
 ├── docs/                         # 截图与介绍页
 ├── .github/ISSUE_TEMPLATE/       # 安装问题 / 功能建议
 ├── INSTALL.md · README.en.md · LICENSE
@@ -210,7 +210,12 @@ workbuddy-media-desk/             # 整个目录就是一个可分发的包
 node --test tests/*.test.mjs
 ```
 
-47 项，零依赖，用 Node 内置 runner。覆盖：跨进程并发写、锁接管、文件权限、安装脚本的拒绝路径、CSV 解析（BOM/引号/坏行）、复盘平台分组、累计数据去重、导出目录冲突、HTTP 接口鉴权与路径穿越。
+56 项，零依赖，用 Node 内置 runner。CI 跑 ubuntu / macOS / Windows × Node 20/22。
+
+- **行为测试 47 项**：跨进程并发写、锁接管、文件权限、安装脚本的拒绝路径、CSV 解析（BOM/引号/坏行）、复盘平台分组、累计数据去重、导出目录冲突、HTTP 接口鉴权与路径穿越
+- **静态检查 9 项**：语法、相对 import 是否指向真实文件、`plugin.json` 声明的路径是否存在、文档断链、介绍页图片、CRLF/BOM/行尾空格/制表符、库代码不许 `console.log`、误提交的密钥、`install.sh` 可执行位
+
+> 没引 ESLint：这个包刻意零依赖，而上面这几类才是真会出事的。规则写在 `tests/lint.test.mjs` 里，改了就往下加一条。
 
 ## 反馈
 

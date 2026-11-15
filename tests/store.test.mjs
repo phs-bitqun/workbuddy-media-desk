@@ -92,7 +92,7 @@ test('锁对象只能释放一次，重复调用不报错', async () => {
   await release() // 不应抛错，也不应删掉别人的锁
 })
 
-test('数据目录 0700、状态与撤销栈 0600', async () => {
+test('数据目录 0700、状态与撤销栈 0600', { skip: process.platform === 'win32' ? 'Windows 没有 POSIX 权限位' : false }, async () => {
   const { dir, store } = await freshHome()
   await store.mutate('测试', (d) => { d.draftFormat = 'article'; return 1 })
   const dirMode = (await stat(dir)).mode & 0o777

@@ -8,6 +8,7 @@ import { join } from 'node:path'
 // homedir() 是调用时读 HOME，所以先把 HOME 指到临时目录，再加载模块
 const FAKE_HOME = await mkdtemp(join(tmpdir(), 'desk-export-'))
 process.env.HOME = FAKE_HOME
+process.env.USERPROFILE = FAKE_HOME // Windows 的 homedir() 读这个
 const { exportProduction, safeName, defaultExportDir } = await import('../skills/media-desk/scripts/lib/export.mjs')
 
 const FILES = join(FAKE_HOME, 'files')

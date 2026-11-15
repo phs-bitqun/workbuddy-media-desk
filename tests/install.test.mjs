@@ -11,6 +11,8 @@ import { fileURLToPath } from 'node:url'
 const run = promisify(execFile)
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const INSTALL = join(ROOT, 'install.sh')
+// 技能装法依赖 bash 与 ln -s，Windows 走专家包（PowerShell 拷贝），这里显式跳过而不是假装通
+const SKIP = process.platform === 'win32' ? 'Windows 上技能装法不适用，走专家包' : false
 
 function install({ home, src, env = {} }) {
   return run('bash', [INSTALL], {
@@ -22,7 +24,7 @@ function install({ home, src, env = {} }) {
   )
 }
 
-test('目标是非 Git 目录：拒绝执行，且一个文件都不删', async () => {
+test('目标是非 Git 目录：拒绝执行，且一个文件都不删', { skip: SKIP }, async () => {
   const home = await mkdtemp(join(tmpdir(), 'desk-inst-'))
   const src = join(home, 'my-src')
   await mkdir(src, { recursive: true })
@@ -35,7 +37,7 @@ test('目标是非 Git 目录：拒绝执行，且一个文件都不删', async 
   assert.equal(await readFile(join(src, 'important.txt'), 'utf8'), '别删我', '用户文件被删了')
 })
 
-test('目标是别的 Git 仓库：拒绝，仓库保持原样', async () => {
+test('目标是别的 Git 仓库：拒绝，仓库保持原样', { skip: SKIP }, async () => {
   const home = await mkdtemp(join(tmpdir(), 'desk-inst-'))
   const src = join(home, 'other')
   await mkdir(src, { recursive: true })
@@ -55,7 +57,7 @@ test('目标是别的 Git 仓库：拒绝，仓库保持原样', async () => {
   assert.ok(await stat(join(src, '.git')), '别人的仓库被清掉了')
 })
 
-test('MEDIA_DESK_SRC 指向 HOME 或根目录时直接拒绝', async () => {
+test('MEDIA_DESK_SRC 指向 HOME 或根目录时直接拒绝', { skip: SKIP }, async () => {
   const home = await mkdtemp(join(tmpdir(), 'desk-inst-'))
   for (const src of [home, '/']) {
     const { code, out } = await install({ home, src })
@@ -64,7 +66,7 @@ test('MEDIA_DESK_SRC 指向 HOME 或根目录时直接拒绝', async () => {
   }
 })
 
-test('全新安装：克隆、挂软链、自检通过，无临时目录残留', async () => {
+test('全新安装：克隆、挂软链、自检通过，无临时目录残留', { skip: SKIP }, async () => {
   const home = await mkdtemp(join(tmpdir(), 'desk-inst-'))
   const { code, out } = await install({ home })
   assert.equal(code, 0, out)
@@ -81,7 +83,7 @@ test('全新安装：克隆、挂软链、自检通过，无临时目录残留',
   assert.equal(parent.some(n => n.includes('.clone-')), false, `残留了临时目录：${parent.join(',')}`)
 })
 
-test('重复执行走更新分支，不破坏已装内容', async () => {
+test('重复执行走更新分支，不破坏已装内容', { skip: SKIP }, async () => {
   const home = await mkdtemp(join(tmpdir(), 'desk-inst-'))
   const first = await install({ home })
   assert.equal(first.code, 0, first.out)
@@ -91,7 +93,7 @@ test('重复执行走更新分支，不破坏已装内容', async () => {
   assert.ok(await stat(join(home, '.workbuddy', 'skills', 'media-desk', 'SKILL.md')))
 })
 
-test('目标是已有软链时能覆盖（不算用户数据）', async () => {
+test('目标是已有软链时能覆盖（不算用户数据）', { skip: SKIP }, async () => {
   const home = await mkdtemp(join(tmpdir(), 'desk-inst-'))
   const link = join(home, '.workbuddy', 'skills', 'media-desk')
   await mkdir(dirname(link), { recursive: true })
