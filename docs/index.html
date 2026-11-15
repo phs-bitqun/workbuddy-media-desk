@@ -133,6 +133,7 @@
       <a href="#install">安装</a>
       <a href="#ui">界面</a>
       <a href="#why">为什么这样设计</a>
+      <a href="https://github.com/phs-bitqun/workbuddy-media-desk/issues/new/choose">提 issue</a>
       <a href="https://github.com/phs-bitqun/workbuddy-media-desk">GitHub ↗</a>
     </nav>
   </div>
@@ -243,18 +244,45 @@ node ~/.workbuddy/skills/media-desk/scripts/desk.mjs serve
 
   <section id="why">
     <div class="sec-head rise">
-      <h2>为什么不是一个网页应用</h2>
+      <h2>为什么不是云端应用</h2>
       <div class="quote">
         稿子是你的，数据也是你的。工具不该为了「方便」把它们搬到别人服务器上。
-        <span>—— 所以没有账号、没有云端、没有统计埋点。状态就是一个 JSON 文件，在你自己的硬盘里。</span>
+        <span>—— 所以界面跑在你自己机器的 127.0.0.1 上，没有账号、没有云端、没有统计埋点。状态就是一个 JSON 文件，在你自己的硬盘里。</span>
       </div>
     </div>
     <div class="grid">
-      <div class="card rise"><div class="num">数据</div><h3>一个 state.json</h3><p>换电脑就拷目录，占空间几 MB。撤销链、版本、排期全在里面。</p></div>
-      <div class="card rise"><div class="num">状态</div><h3>只走 CLI 改</h3><p>所有写入收敛到一个入口，避免手改文件把撤销链写坏。</p></div>
+      <div class="card rise"><div class="num">数据</div><h3>一个 state.json</h3><p>换电脑就拷目录，占空间几 MB。撤销链、菜单配置、排期全在里面。</p></div>
+      <div class="card rise"><div class="num">写入</div><h3>只有一个入口</h3><p>界面和命令行共用同一套写入逻辑与撤销链，不存在两套状态各写各的。</p></div>
       <div class="card rise"><div class="num">风格</div><h3>15 张风格卡</h3><p>AI 科技、美食探店、读书笔记……也能从你自己的旧稿里提炼一张。</p></div>
       <div class="card rise"><div class="num">来源</div><h3>MIT 上游移植</h3><p>流程与提示词来自 woniuniuniu/dsh-media-desk，换成 WorkBuddy 的形态。</p></div>
     </div>
+  </section>
+
+  <section id="feedback">
+    <div class="sec-head rise">
+      <h2>装不上，或者想让它多做点什么</h2>
+      <p>所有问题走同一个入口，选一个表单填完就行。</p>
+    </div>
+    <div class="steps">
+      <div class="step rise">
+        <div class="stepn">!</div>
+        <div>
+          <h4>安装 / 运行问题</h4>
+          <p style="color:var(--ink-2);font-size:14.5px">表单会问系统、Node 版本、卡在哪一步、报错原文。这几项填全，基本一轮就能定位。</p>
+        </div>
+      </div>
+      <div class="step rise">
+        <div class="stepn">+</div>
+        <div>
+          <h4>功能建议</h4>
+          <p style="color:var(--ink-2);font-size:14.5px">说清你想解决什么问题，比只给一个方案更容易对上。</p>
+        </div>
+      </div>
+    </div>
+    <p class="note" style="margin-top:18px">
+      <a class="btn btn-primary" href="https://github.com/phs-bitqun/workbuddy-media-desk/issues/new/choose">打开 issue 入口 ↗</a>
+      <span style="margin-left:14px">或直接打开 <a href="https://github.com/phs-bitqun/workbuddy-media-desk/issues/new/choose" style="color:var(--accent);border-bottom:1px solid var(--accent-soft)">issues/new/choose</a></span>
+    </p>
   </section>
 
 </main>
@@ -262,7 +290,7 @@ node ~/.workbuddy/skills/media-desk/scripts/desk.mjs serve
 <footer>
   <div class="wrap row">
     <div>© 2026 phs-bitqun · MIT · 移植自 <a href="https://github.com/woniuniuniu/dsh-media-desk">woniuniuniu/dsh-media-desk</a></div>
-    <div><a href="https://github.com/phs-bitqun/workbuddy-media-desk">GitHub</a> · <a href="https://github.com/phs-bitqun/workbuddy-media-desk/blob/main/INSTALL.md">安装说明</a> · <a href="https://github.com/phs-bitqun/workbuddy-media-desk/blob/main/README.en.md">English</a></div>
+    <div><a href="https://github.com/phs-bitqun/workbuddy-media-desk">GitHub</a> · <a href="https://github.com/phs-bitqun/workbuddy-media-desk/blob/main/INSTALL.md">安装说明</a> · <a href="https://github.com/phs-bitqun/workbuddy-media-desk/blob/main/README.en.md">English</a> · <a href="https://github.com/phs-bitqun/workbuddy-media-desk/issues/new/choose">提 issue</a></div>
   </div>
 </footer>
 
