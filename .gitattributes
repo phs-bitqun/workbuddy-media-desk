@@ -1,0 +1,14 @@
+# 统一用 LF 检出，否则 Windows 上 git 默认把文本转成 CRLF：
+# install.sh 会直接跑不起来，测试里的换行检查也会误报。
+* text=auto eol=lf
+
+# 二进制不要做文本转换
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+*.ico binary
+
+# shell 脚本必须 LF + 可执行
+*.sh text eol=lf
