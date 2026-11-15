@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
 # 自媒体工作台 · WorkBuddy 版 · 安装脚本
 #
-#   curl -fsSL https://raw.githubusercontent.com/phs-bitqun/workbuddy-media-desk/main/install.sh | bash
+#   git clone --depth 1 https://github.com/phs-bitqun/workbuddy-media-desk \
+#     ~/.workbuddy/media-desk-src && bash ~/.workbuddy/media-desk-src/install.sh
 #
 # 做的事：把仓库克隆到 ~/.workbuddy/media-desk-src，再把 ~/.workbuddy/skills/media-desk
 # 软链到它的 skills/media-desk。软链的好处是 git pull 一次就全线更新，不用重装。
 # 不碰你的数据（~/.workbuddy/media-desk/），不装任何依赖。
+#
+# 重复执行是安全的：已有源码走 git pull。
 set -euo pipefail
 
 REPO="${MEDIA_DESK_REPO:-https://github.com/phs-bitqun/workbuddy-media-desk.git}"

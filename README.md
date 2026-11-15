@@ -31,10 +31,12 @@
 ### 方式二：一行命令
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/phs-bitqun/workbuddy-media-desk/main/install.sh | bash
+git clone --depth 1 https://github.com/phs-bitqun/workbuddy-media-desk ~/.workbuddy/media-desk-src && bash ~/.workbuddy/media-desk-src/install.sh
 ```
 
-脚本会检查 Node ≥ 20，克隆到 `~/.workbuddy/media-desk-src`，软链接挂到 `~/.workbuddy/skills/media-desk`，然后跑一次自检。重复执行是安全的：已有源码走 `git pull`。
+只依赖 `github.com` 的 HTTPS，不依赖 `raw.githubusercontent.com`。
+
+> 如果能访问 `raw.githubusercontent.com`，也可以走 `curl -fsSL https://raw.githubusercontent.com/phs-bitqun/workbuddy-media-desk/main/install.sh | bash`。国内网络下该域名常被阻断（实测这台机器 SSL 直接断连），所以上面那条 git 版更稳。
 
 ### 方式三：手工
 
