@@ -90,13 +90,35 @@ node "$env:USERPROFILE\.workbuddy\plugins\marketplaces\my-experts\plugins\workbu
 
 `不存在` 是正常的——第一次还没建库。接下来在工作台里说「开始用」或者直接记一条灵感，它会自动初始化。
 
-## 4 · 打开看板
+## 4 · 看进度：交互界面 或 只读快照
 
-五个页面：**灵感 · 内容 · 排期 · 复盘 · 风格**。
+### 4a · 交互界面（能改数据）
 
-![看板](docs/desk-ideas.png)
+```bash
+node ~/.workbuddy/plugins/marketplaces/my-experts/plugins/workbuddy-media-desk/skills/media-desk/scripts/desk.mjs serve
+# 装成技能的用：
+node ~/.workbuddy/skills/media-desk/scripts/desk.mjs serve
+```
 
-看板是**只读**的，用浏览器打开 `~/.workbuddy/media-desk/desk.html` 就能看。改数据都在对话里说，或者走命令行——不要手改 `state.json`。
+打开 `http://127.0.0.1:4318/`。`Ctrl+C` 停，数据不会丢。
+
+![交互界面](docs/ui-desk.png)
+
+能做的事：记灵感、点卡片改标题/状态/平台/排期、直接编辑成稿正文、上传封面和配图、录平台数据或粘 CSV、开关写作规则、切风格。右上 **⚙ 菜单** 里可以给工作台改名、给页签改名、上下调序、隐藏、删除，还能加筛选视图（比如「内容 + 待发布 + 小红书」叫「小红书待发」）。
+
+![菜单设置](docs/ui-menu.png)
+
+**生成不在界面里**——写正文、画封面分镜要模型，回对话说一句。抽屉里有「复制成稿指令」按钮，复制一句话粘过去就行。
+
+服务只绑 `127.0.0.1`，每次启动生成一次性令牌，别的网页调不动它。
+
+### 4b · 只读快照（不用端口）
+
+```bash
+node <同样的 desk.mjs 路径> render
+```
+
+生成 `~/.workbuddy/media-desk/desk.html`，双击就能开。五个页面按你的菜单配置排，但不能改数据。
 
 ## 5 · 数据存在哪
 

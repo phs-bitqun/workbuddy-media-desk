@@ -28,9 +28,36 @@
   "accounts": [],
   "draftFormat": "script",
   "settings": { "imageCount": 4, "shotCount": 6, "generateImages": true, "platform": "小红书" },
+  "ui": { "title": "自媒体工作台", "nav": [] },
   "sampleCleared": true
 }
 ```
+
+### ui — 界面与菜单配置
+
+菜单不写死，存在这里。`desk serve`、`desk render` 读的是同一份，所以静态看板和交互界面的页签永远一致。
+
+```json
+{
+  "title": "我的内容台",
+  "nav": [
+    { "id": "nav_ideas", "type": "ideas", "label": "想法", "icon": "✦", "visible": true },
+    { "id": "nav_view_ab12", "type": "view", "label": "小红书待发", "icon": "◎", "visible": true,
+      "base": "content", "filter": { "status": "ready", "platform": "小红书" } },
+    { "id": "nav_schedule", "type": "schedule", "label": "排期", "icon": "◷", "visible": false }
+  ]
+}
+```
+
+| 字段 | 说明 |
+| --- | --- |
+| `type` | `ideas` / `content` / `schedule` / `insights` / `style` 内置页，或 `view` 自定义筛选视图 |
+| `label` | 页签显示名，最多 24 字 |
+| `visible` | `false` 时隐藏，但配置保留 |
+| `base` | 仅 `view` 用：`content`（按状态分栏）或 `ideas`（卡片流） |
+| `filter` | 仅 `view` 用：`status` / `platform` / `tag` / `q`，可组合 |
+
+约束：最多 12 项；`type` 不在白名单里的项会被**丢弃**；如果全部被隐藏，读的时候退回默认五项——所以界面不会变成全白。老数据没有 `ui` 字段也能读，读时补默认值，不写回。
 
 ### items[] — 一条灵感 / 一篇内容
 
@@ -143,7 +170,7 @@
 | | 上游 dsh-media-desk | 这里 |
 | --- | --- | --- |
 | 数据目录 | `~/.dsh/media-desk/` | `~/.workbuddy/media-desk/` |
-| 界面 | DSH 侧栏 React 五页 | `desk.html` 静态只读看板 |
+| 界面 | DSH 侧栏 React 五页 | `desk serve` 本地交互界面（菜单可自定义）；`desk render` 只读快照 |
 | 写脚本 | 插件调 DSH 配置的模型 | WorkBuddy 自身模型 + `references/prompts.md` |
 | 生图 | 自填图片 API Key / 订阅工具 | WorkBuddy ImageGen 工具 |
 | 撤销 | 进程内存 | `undo.json` 持久化 |

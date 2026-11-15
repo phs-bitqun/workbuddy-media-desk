@@ -127,6 +127,95 @@ export function defaultSettings() {
   }
 }
 
+/* ------------------------------ 菜单配置 ------------------------------ */
+
+/** 菜单项可用的页面类型。view 是自定义的筛选视图，没有内置页面。 */
+export const NAV_TYPES = ['ideas', 'content', 'schedule', 'insights', 'style', 'view']
+
+export const NAV_BUILTIN_LABEL = {
+  ideas: '灵感',
+  content: '内容',
+  schedule: '排期',
+  insights: '复盘',
+  style: '风格',
+}
+
+const NAV_ICON = { ideas: '✦', content: '▤', schedule: '◷', insights: '◔', style: '✎', view: '◎' }
+
+export const MAX_NAV = 12
+
+/** 默认菜单：五个内置页，顺序和上游一致。 */
+export function defaultNav() {
+  return Object.keys(NAV_BUILTIN_LABEL).map(type => ({
+    id: `nav_${type}`,
+    type,
+    label: NAV_BUILTIN_LABEL[type],
+    icon: NAV_ICON[type],
+    visible: true,
+  }))
+}
+
+export function defaultUi() {
+  return { title: '自媒体工作台', nav: defaultNav() }
+}
+
+const text = (value, max) => (typeof value === 'string' ? value.trim().slice(0, max) : '')
+const PLATFORM_SET = new Set(['公众号', '小红书', '抖音', 'B站', '视频号', 'TikTok', 'Instagram', 'YouTube', 'X'])
+const STATUS_SET = new Set(['idea', 'outline', 'draft', 'ready', 'published'])
+
+/** 菜单项是不可信输入（可能来自界面或手改），逐字段白名单化。 */
+function sanitizeNavItem(raw, index, seen) {
+  if (!raw || typeof raw !== 'object') return null
+  const type = NAV_TYPES.includes(raw.type) ? raw.type : null
+  if (!type) return null
+  let id = typeof raw.id === 'string' && /^[A-Za-z0-9_-]{1,40}$/.test(raw.id) ? raw.id : `nav_${type}_${index}`
+  if (seen.has(id)) id = `${id}_${index}`
+  seen.add(id)
+  const item = {
+    id,
+    type,
+    label: text(raw.label, 24) || NAV_BUILTIN_LABEL[type] || '视图',
+    icon: text(raw.icon, 4) || NAV_ICON[type],
+    visible: raw.visible !== false,
+  }
+  // view 只能筛选内置列表页，不能凭空造一个页面
+  if (type === 'view') {
+    const base = raw.base === 'ideas' ? 'ideas' : 'content'
+    const filter = {}
+    const status = text(raw.filter?.status, 20)
+    if (STATUS_SET.has(status)) filter.status = status
+    const platform = text(raw.filter?.platform, 20)
+    if (PLATFORM_SET.has(platform)) filter.platform = platform
+    const tag = text(raw.filter?.tag, 20)
+    if (tag) filter.tag = tag
+    const q = text(raw.filter?.q, 40)
+    if (q) filter.q = q
+    item.base = base
+    item.filter = filter
+  }
+  return item
+}
+
+/** 规范化整份菜单配置。空或非法一律退回默认。 */
+export function sanitizeUi(raw) {
+  const ui = defaultUi()
+  if (!raw || typeof raw !== 'object') return ui
+  const title = text(raw.title, 30)
+  if (title) ui.title = title
+  if (Array.isArray(raw.nav)) {
+    const seen = new Set()
+    const nav = raw.nav.slice(0, MAX_NAV).map((row, i) => sanitizeNavItem(row, i, seen)).filter(Boolean)
+    // 至少留一个可见项，否则界面会是一片空白
+    if (nav.length && nav.some(row => row.visible)) ui.nav = nav
+  }
+  return ui
+}
+
+/** 老 state 没有 ui 字段，读的时候补上；不写回，避免无谓的 mtime 变化。 */
+export function ensureUi(state) {
+  return sanitizeUi(state.ui)
+}
+
 /** 空的初始状态：只有 15 个预设风格。 */
 export function emptyState(now = new Date()) {
   return {
@@ -142,6 +231,7 @@ export function emptyState(now = new Date()) {
     accounts: [],
     draftFormat: 'script',
     settings: defaultSettings(),
+    ui: defaultUi(),
     sampleCleared: true,
   }
 }

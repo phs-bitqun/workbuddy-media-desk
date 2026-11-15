@@ -2,7 +2,7 @@
 // 只读视图，所有改动走 desk.mjs。图片按 files/ 相对路径引用，所以 HTML 必须放在数据根目录。
 import { STATUS_LABEL, statusLabel } from './ops.mjs'
 import { computeInsights } from './insights.mjs'
-import { STYLE_CATEGORIES } from './seed.mjs'
+import { STYLE_CATEGORIES, ensureUi } from './seed.mjs'
 import { activeStyle } from './ops.mjs'
 import { fmtWhen } from './ops.mjs'
 
@@ -166,16 +166,31 @@ function ideaCard(item) {
 </article>`
 }
 
-function pageIdeas(state) {
-  const rows = [...state.items].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
-  if (!rows.length) return `<div class="empty">灵感墙还是空的。说一句「记个灵感：……」就有第一张卡片。</div>`
+/** 自定义筛选视图用的过滤。字段白名单在 seed.sanitizeUi 那边已经做过。 */
+function screen(items, filter) {
+  if (!filter) return items
+  let rows = items
+  if (filter.status) rows = rows.filter(r => r.status === filter.status)
+  if (filter.platform) rows = rows.filter(r => r.platform === filter.platform)
+  if (filter.tag) rows = rows.filter(r => (r.tags ?? []).includes(filter.tag))
+  if (filter.q) {
+    const q = filter.q.toLowerCase()
+    rows = rows.filter(r => `${r.title} ${r.body ?? ''} ${(r.tags ?? []).join(' ')}`.toLowerCase().includes(q))
+  }
+  return rows
+}
+
+function pageIdeas(state, filter) {
+  const rows = screen([...state.items].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt)), filter)
+  if (!rows.length) return `<div class="empty">这里还没有内容。说一句「记个灵感：……」就有第一张卡片。</div>`
   return `<input id="q" class="search" placeholder="搜标题、正文、标签">
 <div class="grid">${rows.map(ideaCard).join('')}</div>`
 }
 
-function pageContent(state) {
+function pageContent(state, filter) {
+  const shown = screen(state.items, filter)
   const cols = Object.keys(STATUS_LABEL).map(status => {
-    const rows = state.items.filter(row => row.status === status)
+    const rows = shown.filter(row => row.status === status)
     const body = rows.length
       ? rows.map(row => {
         const p = row.production
@@ -312,21 +327,41 @@ ${groups.join('')}`
 
 export function renderDesk(state, { root } = {}) {
   const now = new Date()
-  const counts = Object.keys(STATUS_LABEL).map(key => state.items.filter(row => row.status === key).length)
+  const ui = ensureUi(state)
   const style = activeStyle(state)
+
+  // 菜单按用户配置来：顺序、名字、显隐、自定义筛选视图都生效
+  const tabs = ui.nav.filter(row => row.visible).map((row) => {
+    let html = ''
+    switch (row.type) {
+      case 'ideas': html = pageIdeas(state); break
+      case 'content': html = pageContent(state); break
+      case 'schedule': html = pageSchedule(state, now); break
+      case 'insights': html = pageInsights(state); break
+      case 'style': html = pageStyle(state); break
+      case 'view': html = row.base === 'ideas' ? pageIdeas(state, row.filter) : pageContent(state, row.filter); break
+      default: html = ''
+    }
+    return { id: row.id, label: row.label, icon: row.icon ?? '', html }
+  })
+  if (!tabs.length) tabs.push({ id: 'nav_empty', label: '空', icon: '', html: '<div class="empty">菜单里没有可显示的页面。</div>' })
+
+  const navHtml = tabs.map((t, i) => `<button data-tab="${esc(t.id)}" aria-selected="${i === 0}">${esc(t.label)}</button>`).join('')
+  const paneHtml = tabs.map((t, i) => `<section id="pane-${esc(t.id)}"${i === 0 ? '' : ' hidden'}>${t.html}</section>`).join('')
+
   return `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>自媒体工作台</title>
+<title>${esc(ui.title)}</title>
 <style>${CSS}</style>
 </head>
 <body>
 <div class="wrap">
 <header>
   <div>
-    <h1>自媒体工作台</h1>
+    <h1>${esc(ui.title)}</h1>
     <div class="sub">记一句灵感，一键做出脚本、封面、配图和分镜</div>
   </div>
   <div class="chips">
@@ -338,23 +373,15 @@ export function renderDesk(state, { root } = {}) {
 </header>
 
 <nav>
-  <button data-tab="ideas" aria-selected="true">灵感</button>
-  <button data-tab="content" aria-selected="false">内容</button>
-  <button data-tab="schedule" aria-selected="false">排期</button>
-  <button data-tab="insights" aria-selected="false">复盘</button>
-  <button data-tab="style" aria-selected="false">风格</button>
+${navHtml}
 </nav>
 
 <main>
-  <section id="pane-ideas">${pageIdeas(state)}</section>
-  <section id="pane-content" hidden>${pageContent(state)}</section>
-  <section id="pane-schedule" hidden>${pageSchedule(state, now)}</section>
-  <section id="pane-insights" hidden>${pageInsights(state)}</section>
-  <section id="pane-style" hidden>${pageStyle(state)}</section>
+${paneHtml}
 </main>
 
 <footer>
-  <span>数据在 ${esc(root ?? '')} · 这个页面是只读的，改动走 desk.mjs</span>
+  <span>数据在 ${esc(root ?? '')} · 这是只读快照；要改数据用 <code>desk serve</code> 打开交互界面</span>
   <span>移植自 woniuniuniu/dsh-media-desk（MIT）</span>
 </footer>
 </div>

@@ -131,6 +131,7 @@
     <nav>
       <a href="#how">怎么用</a>
       <a href="#install">安装</a>
+      <a href="#ui">界面</a>
       <a href="#why">为什么这样设计</a>
       <a href="https://github.com/phs-bitqun/workbuddy-media-desk">GitHub ↗</a>
     </nav>
@@ -208,10 +209,31 @@ workbuddy-media-desk/skills/media-desk/scripts/desk.mjs doctor</pre>
     <p class="note" style="margin-top:22px;max-width:780px">上面那句提示词实际跑的就是这条命令，想自己在终端里来一遍：<code style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px">git clone --depth 1 https://github.com/phs-bitqun/workbuddy-media-desk ~/.workbuddy/media-desk-src &amp;&amp; bash ~/.workbuddy/media-desk-src/install.sh</code>。两种装法共用同一份数据，也可以同时装。</p>
   </section>
 
+  <section id="ui">
+    <div class="sec-head rise">
+      <h2>有界面，菜单栏还能自己配</h2>
+      <p>一条命令起本地界面，数据不出本机。页签能改名、调序、隐藏，也能加一个「小红书待发」这样的筛选视图。</p>
+    </div>
+    <div class="shot rise"><img src="ui-desk.png" alt="本地交互界面：菜单栏、灵感卡片、记灵感输入框" loading="lazy"></div>
+    <div class="two" style="margin-top:16px">
+      <div class="shot rise"><img src="ui-menu.png" alt="菜单设置面板：改名、调序、隐藏、新增筛选视图" loading="lazy"></div>
+      <div class="rise" style="align-self:center">
+<pre><span class="cm"># 起界面</span>
+node ~/.workbuddy/skills/media-desk/scripts/desk.mjs serve
+<span class="cm"># → http://127.0.0.1:4318/</span></pre>
+        <ul style="margin:16px 0 0 18px;color:var(--ink-2);font-size:14.5px;line-height:2">
+          <li>记灵感、改稿、排期、传图、录数据、切风格</li>
+          <li>页签改名 / 调序 / 隐藏，加筛选视图</li>
+          <li>生成仍在对话里，抽屉里一键复制指令</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
   <section>
     <div class="sec-head rise">
-      <h2>五页看板，随时看进度</h2>
-      <p>灵感 · 内容 · 排期 · 复盘 · 风格。只读，用浏览器打开即可，改数据还是走对话或命令行。</p>
+      <h2>不想起服务？有只读快照</h2>
+      <p>一条命令生成一份 desk.html，双击就开，不需要端口。改数据还是走界面或对话。</p>
     </div>
     <div class="two">
       <div class="shot rise"><img src="desk-content.png" alt="内容页：按状态分栏" loading="lazy"></div>

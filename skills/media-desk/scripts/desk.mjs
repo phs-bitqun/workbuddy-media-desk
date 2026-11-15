@@ -3,10 +3,9 @@
 // 用法：node desk.mjs <命令> [参数] [--json]
 import { copyFile, mkdir, readFile, writeFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
-import { basename, extname, join, resolve } from 'node:path'
-import { homedir } from 'node:os'
+import { extname, join, resolve } from 'node:path'
 import { deskHome, Store } from './lib/store.mjs'
-import { emptyState, sampleState, STYLE_PRESETS, STYLE_CATEGORIES, defaultSettings } from './lib/seed.mjs'
+import { emptyState, sampleState, STYLE_PRESETS, STYLE_CATEGORIES, defaultSettings, ensureUi } from './lib/seed.mjs'
 import {
   STATUSES, STATUS_LABEL, KINDS, PLATFORMS, statusLabel, fmtWhen, fmtShort, findItem,
   addItem, updateItem, deleteItem, scheduleItem, savePlan, saveArticle, applyRevision,
@@ -16,6 +15,8 @@ import {
 import { computeInsights, proposeRules } from './lib/insights.mjs'
 import { draftFormat } from './lib/style.mjs'
 import { renderDesk } from './lib/render.mjs'
+import { exportProduction } from './lib/export.mjs'
+import { startServer } from './lib/server.mjs'
 
 /* ------------------------------ 参数解析 ------------------------------ */
 
@@ -523,48 +524,30 @@ const commands = {
   async export() {
     const state = await needState()
     const item = findItem(state, args[0] ?? '')
-    const p = item.production
-    if (!p) fail('这条还没有成稿')
-    const safe = p.title.replace(/[\/\\:*?"<>|]/g, '_').slice(0, 60) || '成稿'
-    const outDir = flags.dir && flags.dir !== true ? resolve(String(flags.dir)) : join(homedir(), 'Documents', '自媒体工作台', safe)
-    await mkdir(outDir, { recursive: true })
-    const written = []
-
-    const format = draftFormat(p.format)
-    const articleName = format === 'article' ? '文章.md' : '口播脚本.md'
-    if (p.article) {
-      await writeFile(join(outDir, articleName), `# ${p.title}\n\n${p.article}\n`, 'utf8')
-      written.push(articleName)
-    }
-    if (p.shots?.length) {
-      const lines = [`# ${p.title} · 分镜脚本`, '', `封面大字：${p.coverText}`, '']
-      lines.push('| # | 景别 | 画面 | 口播 | 秒 |', '| --- | --- | --- | --- | --- |')
-      for (const s of p.shots) lines.push(`| ${s.no} | ${s.shot} | ${s.visual || ''} | ${s.voice || ''} | ${s.seconds} |`)
-      await writeFile(join(outDir, '分镜脚本.md'), `${lines.join('\n')}\n`, 'utf8')
-      written.push('分镜脚本.md')
-    }
-    const copy = async (asset, name) => {
-      if (!asset?.src) return
-      const from = join(store.root, asset.src)
-      if (!existsSync(from)) return
-      const target = `${name}${extname(from)}`
-      await copyFile(from, join(outDir, target))
-      written.push(target)
-    }
-    await copy(p.cover, '视频封面')
-    for (const [i, image] of (p.images ?? []).entries()) await copy(image, `配图${i + 1}`)
-    for (const shot of p.shots ?? []) await copy(shot, `分镜${shot.no}`)
-
+    if (!item.production) fail('这条还没有成稿')
+    const { dir, files } = await exportProduction(store, item, {
+      dir: flags.dir && flags.dir !== true ? String(flags.dir) : undefined,
+    })
     await store.mutate('记录导出路径', draft => {
       const target = findItem(draft, args[0] ?? '')
-      if (target.production) target.production.savedPath = outDir
-      return outDir
+      if (target.production) target.production.savedPath = dir
+      return dir
     }, { undoable: false })
+    if (wantsJson) return json({ dir, files })
+    say(`已保存到：${dir}`)
+    for (const file of files) say(`  ${file}`)
+    if (!files.length) say('  （这条成稿还没有正文和图片）')
+  },
 
-    if (wantsJson) return json({ dir: outDir, files: written })
-    say(`已保存到：${outDir}`)
-    for (const file of written) say(`  ${file}`)
-    if (!written.length) say('  （这条成稿还没有正文和图片）')
+  /** serve：起本地交互界面。Ctrl+C 停。 */
+  async serve() {
+    await needState()
+    const port = flags.port ? Number(flags.port) : 4318
+    if (!Number.isFinite(port) || port < 1024 || port > 65535) fail('--port 要在 1024 到 65535 之间')
+    const { url } = await startServer({ store, port })
+    say('')
+    say(`在浏览器打开：${url}`)
+    say('菜单栏可以在界面里改：改名、调顺序、隐藏，或者加一个筛选视图。')
   },
 
   async render() {
@@ -641,6 +624,7 @@ const commands = {
   propose                                 提炼规则提案
 
   render                                  生成五页工作台 HTML
+  serve [--port 4318]                     起本地交互界面（可改数据、可自定义菜单）
   undo                                    撤销上一步
   stats | doctor                          概览 / 自检
 
