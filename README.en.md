@@ -22,7 +22,15 @@ This is a **WorkBuddy port** of [woniuniuniu/dsh-media-desk](https://github.com/
 
 ## Install
 
-Requires **Node.js 18+** and the WorkBuddy desktop app.
+Requires **Node.js 20+** and the WorkBuddy desktop app.
+
+**One sentence.** Paste this into a fresh WorkBuddy session and it installs itself:
+
+```text
+Install the Media Desk as a WorkBuddy skill: clone https://github.com/phs-bitqun/workbuddy-media-desk into ~/.workbuddy/media-desk-src, symlink ~/.workbuddy/skills/media-desk to its skills/media-desk, run `doctor` on scripts/desk.mjs and confirm it prints "内置风格预设 15 个", then remind me to restart WorkBuddy. Don't touch anything already in ~/.workbuddy/media-desk/.
+```
+
+That installs the **skill**. For the expert card instead, do it by hand:
 
 ```bash
 git clone https://github.com/phs-bitqun/workbuddy-media-desk.git
@@ -32,7 +40,7 @@ cp -R workbuddy-media-desk ~/.workbuddy/plugins/marketplaces/my-experts/plugins/
 
 Restart WorkBuddy. An expert card named **自媒体工作台 / Media Desk** shows up under **Experts** in the left sidebar. Click it and start talking.
 
-Windows: copy the inner `workbuddy-media-desk` folder into `%USERPROFILE%\.workbuddy\plugins\marketplaces\my-experts\plugins\`.
+Windows: copy the `workbuddy-media-desk` folder into `%USERPROFILE%\.workbuddy\plugins\marketplaces\my-experts\plugins\`.
 
 Full walkthrough, FAQ and data migration: **[INSTALL.md](INSTALL.md)** (Chinese).
 

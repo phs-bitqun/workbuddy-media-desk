@@ -79,6 +79,19 @@
   pre .cm{color:#8f8779}
   .note{margin-top:6px;font-size:13.5px;color:var(--ink-3)}
 
+  /* 一句话安装 */
+  .oneline{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:22px 24px;margin-bottom:10px;box-shadow:0 14px 34px -26px rgba(60,50,40,.4)}
+  .oneline h3{font-size:16.5px;font-weight:620;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+  .badge{font-size:11.5px;color:#fff;background:var(--accent);padding:2px 9px;border-radius:100px;font-weight:600;letter-spacing:.02em}
+  .oneline p{margin:9px 0 14px;color:var(--ink-2);font-size:14.5px;max-width:720px}
+  .oneline pre{white-space:pre-wrap;word-break:break-word}
+  .copy{margin-top:12px;display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--panel);
+        color:var(--ink-2);border-radius:9px;padding:8px 16px;font-size:13.5px;font-family:inherit;cursor:pointer;
+        transition:border-color .2s,color .2s,background .2s}
+  .copy:hover{border-color:var(--accent);color:var(--accent)}
+  .copy.done{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+  .subhead{margin:32px 0 14px;font-size:15px;font-weight:620;color:var(--ink-2)}
+
   /* 双图 */
   .two{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px}
   .two .shot{margin:0}
@@ -151,9 +164,16 @@
 
   <section id="install">
     <div class="sec-head rise">
-      <h2>三步装好</h2>
+      <h2>一句话装好</h2>
       <p>需要 Node.js 20 以上和 WorkBuddy 桌面版。全程不改配置文件。</p>
     </div>
+    <div class="oneline rise">
+      <h3><span class="badge">推荐</span>把这段粘给 WorkBuddy，它自己装</h3>
+      <p>装成技能——之后在任何会话里说「记个灵感」就命中。它会克隆、挂软链、跑一次自检，不碰你已有的数据。</p>
+<pre id="oneprompt">帮我把自媒体工作台装成 WorkBuddy 技能：从 https://github.com/phs-bitqun/workbuddy-media-desk 克隆到 ~/.workbuddy/media-desk-src，把 ~/.workbuddy/skills/media-desk 软链接到它的 skills/media-desk，跑一次 scripts/desk.mjs 的 doctor 确认打印出「内置风格预设 15 个」，装完提醒我重启 WorkBuddy；不要动 ~/.workbuddy/media-desk/ 里已有的数据。</pre>
+      <button class="copy" data-copy="#oneprompt" type="button">复制这段提示词</button>
+    </div>
+    <h3 class="subhead rise">或者手动三步，装成专家卡</h3>
     <div class="steps">
       <div class="step rise">
         <div class="stepn">1</div>
@@ -184,7 +204,7 @@ workbuddy-media-desk/skills/media-desk/scripts/desk.mjs doctor</pre>
         </div>
       </div>
     </div>
-    <p class="note" style="margin-top:22px;max-width:760px">只想装成技能、不在「专家」里多一张卡？同一个仓库换一条命令：<code style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px">git clone --depth 1 https://github.com/phs-bitqun/workbuddy-media-desk ~/.workbuddy/media-desk-src &amp;&amp; bash ~/.workbuddy/media-desk-src/install.sh</code>。两种装法共用同一份数据，也可以同时装。</p>
+    <p class="note" style="margin-top:22px;max-width:780px">上面那句提示词实际跑的就是这条命令，想自己在终端里来一遍：<code style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px">git clone --depth 1 https://github.com/phs-bitqun/workbuddy-media-desk ~/.workbuddy/media-desk-src &amp;&amp; bash ~/.workbuddy/media-desk-src/install.sh</code>。两种装法共用同一份数据，也可以同时装。</p>
   </section>
 
   <section>
@@ -243,12 +263,48 @@ workbuddy-media-desk/skills/media-desk/scripts/desk.mjs doctor</pre>
     items.forEach(el => el.classList.add('in'));
   }
 
-  // 兜底：脚本异常或观察器没触发时，1.5 秒后把首屏内的内容放出来
-  setTimeout(() => {
-    items.forEach(el => {
-      if (el.getBoundingClientRect().top < innerHeight * 1.1) el.classList.add('in');
+  // 兜底：快速滚动或跳锚点会跳过观察器，兜一圈把已经进入视口的一律放出来
+  const sweep = () => {
+    items.forEach((el) => {
+      if (!el.classList.contains('in') && el.getBoundingClientRect().top < innerHeight * 1.05) el.classList.add('in');
     });
-  }, 1500);
+  };
+  let ticking = false;
+  const onScroll = () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => { sweep(); ticking = false; });
+  };
+  addEventListener('scroll', onScroll, { passive: true });
+  addEventListener('resize', onScroll, { passive: true });
+  addEventListener('hashchange', () => setTimeout(sweep, 60));
+  [120, 600, 1500].forEach((ms) => setTimeout(sweep, ms));
+
+  // 复制提示词：file:// 下 clipboard API 可能被拒，退回 execCommand
+  document.querySelectorAll('.copy').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const src = document.querySelector(btn.dataset.copy);
+      if (!src) return;
+      const text = src.textContent.trim();
+      let ok = true;
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        ok = document.execCommand('copy');
+        ta.remove();
+      }
+      const label = btn.textContent;
+      btn.textContent = ok ? '已复制' : '复制失败，请手动选中';
+      btn.classList.add('done');
+      setTimeout(() => { btn.textContent = label; btn.classList.remove('done'); }, 1800);
+    });
+  });
 </script>
 </body>
 </html>

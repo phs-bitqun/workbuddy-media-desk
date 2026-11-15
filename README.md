@@ -37,6 +37,16 @@
 
 需要 **Node.js 20+**（实测 v22）和 WorkBuddy。
 
+### 0 · 一句话（推荐）
+
+把下面这段整段粘给 WorkBuddy 的新会话，它自己克隆、挂载、自检：
+
+```text
+帮我把自媒体工作台装成 WorkBuddy 技能：从 https://github.com/phs-bitqun/workbuddy-media-desk 克隆到 ~/.workbuddy/media-desk-src，把 ~/.workbuddy/skills/media-desk 软链接到它的 skills/media-desk，跑一次 scripts/desk.mjs 的 doctor 确认打印出「内置风格预设 15 个」，装完提醒我重启 WorkBuddy；不要动 ~/.workbuddy/media-desk/ 里已有的数据。
+```
+
+这是装成**技能**——之后在任何会话里说「记个灵感」就能命中。想让它出现在左侧「专家」里，走下面的 A。
+
 ### A · 专家包
 
 ```bash

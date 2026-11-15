@@ -9,6 +9,16 @@
 | **专家包** | 左侧「专家」里一张卡，点进去直接聊 | 本文 §1 |
 | **技能** | 技能列表里的 `media-desk`，任意会话里说「记个灵感」就命中 | 本文附录 |
 
+## 0 · 一句话（最快）
+
+不想自己敲命令，就把下面这段整段粘给 WorkBuddy 的新会话：
+
+```text
+帮我把自媒体工作台装成 WorkBuddy 技能：从 https://github.com/phs-bitqun/workbuddy-media-desk 克隆到 ~/.workbuddy/media-desk-src，把 ~/.workbuddy/skills/media-desk 软链接到它的 skills/media-desk，跑一次 scripts/desk.mjs 的 doctor 确认打印出「内置风格预设 15 个」，装完提醒我重启 WorkBuddy；不要动 ~/.workbuddy/media-desk/ 里已有的数据。
+```
+
+它会克隆、挂软链、自检，最后提醒你重启。**装成的是技能**；想在「专家」里要一张卡，继续往下走 §1。
+
 ## 0 · 前置条件
 
 | 需要 | 检查命令 | 说明 |
@@ -103,7 +113,7 @@ node "$env:USERPROFILE\.workbuddy\plugins\marketplaces\my-experts\plugins\workbu
 | 现象 | 原因与处理 |
 |---|---|
 | 专家里没有卡片 | 目录层级放错了。要的是 `plugins/workbuddy-media-desk/`，不是 `plugins/workbuddy-media-desk/workbuddy-media-desk/` 双层 |
-| `node: command not found` | 没装 Node 或版本低于 18 |
+| `node: command not found` | 没装 Node 或版本低于 20 |
 | 说「工作台还没初始化」 | 先在对话里记一条灵感，或跑 `node desk.mjs init` |
 | 看板图片是空白 | 看板必须和数据放在同一个目录，`files/` 是相对路径 |
 | 复盘数字不对 | 同一篇既导过数据又手录过，会重复计；有 `externalId` 时只认导入那行 |
