@@ -1,0 +1,22 @@
+{
+  "name": "workbuddy-media-desk",
+  "version": "1.0.0",
+  "description": "自媒体工作台（WorkBuddy 版）：一句话记灵感，一键成稿——口播脚本、标题、视频封面、配图和黑白线稿分镜。灵感墙、内容、排期、复盘、风格五页看板。移植自 woniuniuniu/dsh-media-desk（MIT）。",
+  "author": {
+    "name": "蜗牛的科技笔记（原作）· WorkBuddy 移植版"
+  },
+  "keywords": [
+    "自媒体",
+    "内容创作",
+    "口播脚本",
+    "视频封面",
+    "分镜",
+    "小红书",
+    "抖音",
+    "公众号",
+    "灵感",
+    "排期",
+    "复盘"
+  ],
+  "skills": "./skills"
+}
