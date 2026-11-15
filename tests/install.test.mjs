@@ -40,7 +40,14 @@ test('目标是别的 Git 仓库：拒绝，仓库保持原样', async () => {
   const src = join(home, 'other')
   await mkdir(src, { recursive: true })
   await run('git', ['init', '-q', src])
-  await run('git', ['-C', src, 'commit', '-q', '--allow-empty', '-m', 'init'])
+  // CI 的干净机器没有全局 git 身份，用环境变量给一个，别依赖本机配置
+  await run('git', ['-C', src, 'commit', '-q', '--allow-empty', '-m', 'init'], {
+    env: {
+      ...process.env,
+      GIT_AUTHOR_NAME: 'test', GIT_AUTHOR_EMAIL: 'test@example.com',
+      GIT_COMMITTER_NAME: 'test', GIT_COMMITTER_EMAIL: 'test@example.com',
+    },
+  })
 
   const { code, out } = await install({ home, src })
   assert.notEqual(code, 0)
