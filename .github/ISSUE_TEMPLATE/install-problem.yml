@@ -1,0 +1,81 @@
+name: 安装 / 运行问题
+description: 装不上、专家卡片不出现、命令行报错，都走这里
+title: "[安装] "
+labels: ["installation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        先看一眼 [安装说明](https://github.com/phs-bitqun/workbuddy-media-desk/blob/main/INSTALL.md)，尤其是文末的「常见问题」表格。
+        如果还是卡住，把下面几项填全，能省掉一整轮来回追问。
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: 系统和芯片
+      options:
+        - macOS（Apple 芯片）
+        - macOS（Intel）
+        - Windows 11
+        - Windows 10
+        - Linux
+    validations:
+      required: true
+
+  - type: input
+    id: node
+    attributes:
+      label: Node.js 版本
+      description: 终端里跑 `node -v` 的输出，例如 v22.22.2
+      placeholder: v22.22.2
+    validations:
+      required: true
+
+  - type: input
+    id: wb
+    attributes:
+      label: WorkBuddy 版本
+      description: 应用里「关于 WorkBuddy」能看到
+      placeholder: 1.x.x
+    validations:
+      required: false
+
+  - type: dropdown
+    id: stage
+    attributes:
+      label: 卡在哪一步
+      options:
+        - 拷贝目录这一步就出错（命令报错）
+        - 目录放好了，但「专家」里没有卡片
+        - 卡片在，点进去报错
+        - 命令行 `desk.mjs doctor` 报错
+        - 能用，但某个功能行为不对
+    validations:
+      required: true
+
+  - type: textarea
+    id: error
+    attributes:
+      label: 报错信息
+      description: 原样粘贴终端输出或应用提示，不要只写「报错了」
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: tried
+    attributes:
+      label: 已经试过什么
+      description: 比如重启过、重新注册过、换过路径
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: 自查
+      options:
+        - label: 目录是 `plugins/workbuddy-media-desk/`，不是 `plugins/workbuddy-media-desk/workbuddy-media-desk/` 双层
+          required: true
+        - label: 重启过 WorkBuddy
+          required: true

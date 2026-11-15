@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>自媒体工作台 · WorkBuddy 专家包</title>
+<meta name="description" content="一句话记灵感，直接出能发的口播脚本、封面大字和分镜，排好发布时间，再把平台数据读成你自己的写作规则。">
+<style>
+  :root{
+    --bg:#faf8f5;
+    --panel:#ffffff;
+    --ink:#1c1b19;
+    --ink-2:#57534d;
+    --ink-3:#8b857c;
+    --line:#e6e0d7;
+    --accent:#b4462f;
+    --accent-soft:#f3e5e0;
+    --radius:14px;
+    --maxw:1060px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+    line-height:1.65;-webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 28px}
+
+  /* 顶栏 */
+  header{position:sticky;top:0;z-index:20;backdrop-filter:blur(12px);background:rgba(250,248,245,.86);border-bottom:1px solid transparent;transition:border-color .3s}
+  header.scrolled{border-bottom-color:var(--line)}
+  .bar{display:flex;align-items:center;justify-content:space-between;height:64px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:600;letter-spacing:.2px}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--accent)}
+  .bar nav{display:flex;gap:22px;font-size:14px;color:var(--ink-2)}
+  .bar nav a{transition:color .2s}
+  .bar nav a:hover{color:var(--accent)}
+
+  /* 首屏 */
+  .hero{padding:84px 0 56px;text-align:center}
+  .tag{display:inline-block;font-size:13px;color:var(--accent);background:var(--accent-soft);padding:5px 12px;border-radius:100px;margin-bottom:22px}
+  h1{font-size:clamp(30px,5vw,48px);line-height:1.25;letter-spacing:-.5px;font-weight:650}
+  h1 em{font-style:normal;color:var(--accent)}
+  .lede{margin:20px auto 0;max-width:620px;color:var(--ink-2);font-size:17px}
+  .cta{margin-top:34px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:10px;font-size:15px;font-weight:550;transition:transform .18s,background .2s,box-shadow .2s}
+  .btn:hover{transform:translateY(-1px)}
+  .btn-primary{background:var(--ink);color:#fff;box-shadow:0 2px 10px rgba(28,27,25,.14)}
+  .btn-primary:hover{background:#000}
+  .btn-ghost{border:1px solid var(--line);background:var(--panel);color:var(--ink-2)}
+  .btn-ghost:hover{border-color:#cfc7ba;color:var(--ink)}
+
+  /* 截图 */
+  .shot{margin:56px 0 0;border-radius:var(--radius);overflow:hidden;border:1px solid var(--line);background:var(--panel);box-shadow:0 20px 50px -28px rgba(60,50,40,.35)}
+  .shot img{display:block;width:100%}
+
+  section{padding:76px 0}
+  .sec-head{max-width:660px;margin-bottom:40px}
+  .sec-head h2{font-size:clamp(22px,3vw,30px);letter-spacing:-.3px;font-weight:640}
+  .sec-head p{margin-top:12px;color:var(--ink-2)}
+
+  /* 能力 */
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(232px,1fr));gap:16px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:24px;transition:transform .22s,box-shadow .22s,border-color .22s}
+  .card:hover{transform:translateY(-3px);box-shadow:0 14px 30px -20px rgba(60,50,40,.45);border-color:#d8d0c4}
+  .num{font-size:12px;color:var(--accent);font-weight:600;letter-spacing:.08em}
+  .card h3{margin:10px 0 8px;font-size:16.5px;font-weight:620}
+  .card p{font-size:14.5px;color:var(--ink-2)}
+
+  /* 安装 */
+  .steps{display:grid;gap:14px}
+  .step{display:grid;grid-template-columns:34px 1fr;gap:16px;align-items:start;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px}
+  .stepn{width:26px;height:26px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-size:13px;font-weight:650}
+  .step h4{font-size:15.5px;font-weight:620;margin-bottom:8px}
+  pre{background:#25231f;color:#efe9df;border-radius:10px;padding:14px 16px;overflow-x:auto;font-size:13px;line-height:1.75;
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  pre .cm{color:#8f8779}
+  .note{margin-top:6px;font-size:13.5px;color:var(--ink-3)}
+
+  /* 双图 */
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px}
+  .two .shot{margin:0}
+
+  /* 引述 */
+  .quote{border-left:3px solid var(--accent);padding:6px 0 6px 20px;color:var(--ink-2);font-size:16px}
+  .quote span{display:block;margin-top:8px;font-size:13.5px;color:var(--ink-3)}
+
+  footer{border-top:1px solid var(--line);padding:38px 0 54px;color:var(--ink-3);font-size:13.5px}
+  footer .row{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+  footer a{color:var(--ink-2);border-bottom:1px solid var(--line)}
+  footer a:hover{color:var(--accent);border-color:var(--accent)}
+
+  /* 入场动画：只在 JS 可用时才隐藏，避免脚本挂了内容一起消失 */
+  .rise{transition:opacity .55s cubic-bezier(.2,.7,.3,1),transform .55s cubic-bezier(.2,.7,.3,1)}
+  html.js .rise{opacity:0;transform:translateY(14px)}
+  html.js .rise.in{opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){
+    html.js .rise{opacity:1;transform:none;transition:none}
+  }
+
+  @media(max-width:720px){
+    .bar nav{display:none}
+    .hero{padding:56px 0 36px}
+    section{padding:56px 0}
+    .two{grid-template-columns:1fr}
+    .step{grid-template-columns:1fr;gap:10px}
+  }
+</style>
+</head>
+<body>
+
+<header id="hdr">
+  <div class="wrap bar">
+    <div class="brand"><span class="dot"></span>自媒体工作台</div>
+    <nav>
+      <a href="#how">怎么用</a>
+      <a href="#install">安装</a>
+      <a href="#why">为什么这样设计</a>
+      <a href="https://github.com/phs-bitqun/workbuddy-media-desk">GitHub ↗</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <div class="hero">
+    <span class="tag">WorkBuddy 专家包 · MIT</span>
+    <h1>一句话记灵感<br>直接出<em>能发的稿子</em></h1>
+    <p class="lede">口播脚本、封面大字、分镜、发布排期，一步到位。发出去之后的数据再读成你自己的写作规则——下一稿比这一稿省力。</p>
+    <div class="cta">
+      <a class="btn btn-primary" href="#install">开始安装</a>
+      <a class="btn btn-ghost" href="https://github.com/phs-bitqun/workbuddy-media-desk">看源码 ↗</a>
+    </div>
+    <div class="shot rise"><img src="desk-ideas.png" alt="工作台灵感页：卡片式灵感墙" loading="eager"></div>
+  </div>
+
+  <section id="how">
+    <div class="sec-head rise">
+      <h2>说人话，它就懂</h2>
+      <p>不用记命令，也不用先想清楚结构。四句话覆盖了从灵感到复盘的一整轮。</p>
+    </div>
+    <div class="grid">
+      <div class="card rise"><div class="num">01 · 记</div><h3>半句话就够</h3><p>「记个灵感：用 AI 做封面总像素材拼的」——不用组织语言，先落地再说。</p></div>
+      <div class="card rise"><div class="num">02 · 写</div><h3>一次成稿</h3><p>策划案、口播脚本、封面字、六镜分镜一起出，体裁和风格卡你自己定。</p></div>
+      <div class="card rise"><div class="num">03 · 改</div><h3>点名改，不重写</h3><p>「第 3 镜换俯拍」「封面字更有冲击力」——只动你点的那处。</p></div>
+      <div class="card rise"><div class="num">04 · 复盘</div><h3>数据变规则</h3><p>录一周播放互动，提炼规律，确认后写进规则，之后每稿自动生效。</p></div>
+    </div>
+  </section>
+
+  <section id="install">
+    <div class="sec-head rise">
+      <h2>三步装好</h2>
+      <p>需要 Node.js 20 以上和 WorkBuddy 桌面版。全程不改配置文件。</p>
+    </div>
+    <div class="steps">
+      <div class="step rise">
+        <div class="stepn">1</div>
+        <div>
+          <h4>拿到包，放进专家目录</h4>
+<pre><span class="cm"># macOS / Linux</span>
+git clone https://github.com/phs-bitqun/workbuddy-media-desk.git
+mkdir -p ~/.workbuddy/plugins/marketplaces/my-experts/plugins
+cp -R workbuddy-media-desk \
+  ~/.workbuddy/plugins/marketplaces/my-experts/plugins/</pre>
+          <p class="note">不想用 git：仓库右上角 Code → Download ZIP，解压后把里面那层文件夹拷进同一个目录。</p>
+        </div>
+      </div>
+      <div class="step rise">
+        <div class="stepn">2</div>
+        <div>
+          <h4>重启 WorkBuddy</h4>
+          <p style="color:var(--ink-2);font-size:14.5px">左侧点「专家」，会出现一张「自媒体工作台」卡片，头像是位戴眼镜的编辑。点进去就能用。</p>
+        </div>
+      </div>
+      <div class="step rise">
+        <div class="stepn">3</div>
+        <div>
+          <h4>核验（可选）</h4>
+<pre>node ~/.workbuddy/plugins/marketplaces/my-experts/plugins/\
+workbuddy-media-desk/skills/media-desk/scripts/desk.mjs doctor</pre>
+          <p class="note">打印出数据目录和「内置风格预设 15 个」就说明通了。数据落在 ~/.workbuddy/media-desk/，纯本地，不上传。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head rise">
+      <h2>五页看板，随时看进度</h2>
+      <p>灵感 · 内容 · 排期 · 复盘 · 风格。只读，用浏览器打开即可，改数据还是走对话或命令行。</p>
+    </div>
+    <div class="two">
+      <div class="shot rise"><img src="desk-content.png" alt="内容页：按状态分栏" loading="lazy"></div>
+      <div class="shot rise"><img src="desk-insights.png" alt="复盘页：播放趋势与平台分布" loading="lazy"></div>
+    </div>
+  </section>
+
+  <section id="why">
+    <div class="sec-head rise">
+      <h2>为什么不是一个网页应用</h2>
+      <div class="quote">
+        稿子是你的，数据也是你的。工具不该为了「方便」把它们搬到别人服务器上。
+        <span>—— 所以没有账号、没有云端、没有统计埋点。状态就是一个 JSON 文件，在你自己的硬盘里。</span>
+      </div>
+    </div>
+    <div class="grid">
+      <div class="card rise"><div class="num">数据</div><h3>一个 state.json</h3><p>换电脑就拷目录，占空间几 MB。撤销链、版本、排期全在里面。</p></div>
+      <div class="card rise"><div class="num">状态</div><h3>只走 CLI 改</h3><p>所有写入收敛到一个入口，避免手改文件把撤销链写坏。</p></div>
+      <div class="card rise"><div class="num">风格</div><h3>15 张风格卡</h3><p>AI 科技、美食探店、读书笔记……也能从你自己的旧稿里提炼一张。</p></div>
+      <div class="card rise"><div class="num">来源</div><h3>MIT 上游移植</h3><p>流程与提示词来自 woniuniuniu/dsh-media-desk，换成 WorkBuddy 的形态。</p></div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap row">
+    <div>© 2026 phs-bitqun · MIT · 移植自 <a href="https://github.com/woniuniuniu/dsh-media-desk">woniuniuniu/dsh-media-desk</a></div>
+    <div><a href="https://github.com/phs-bitqun/workbuddy-media-desk">GitHub</a> · <a href="https://github.com/phs-bitqun/workbuddy-media-desk/blob/main/INSTALL.md">安装说明</a> · <a href="https://github.com/phs-bitqun/workbuddy-media-desk/blob/main/README.en.md">English</a></div>
+  </div>
+</footer>
+
+<script>
+  document.documentElement.classList.add('js');
+
+  const hdr = document.getElementById('hdr');
+  addEventListener('scroll', () => hdr.classList.toggle('scrolled', scrollY > 8), {passive:true});
+
+  const items = [...document.querySelectorAll('.rise')];
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (!e.isIntersecting) return;
+        e.target.classList.add('in');
+        io.unobserve(e.target);
+      });
+    }, {threshold: 0, rootMargin: '0px 0px -8% 0px'});
+    items.forEach(el => io.observe(el));
+  } else {
+    items.forEach(el => el.classList.add('in'));
+  }
+
+  // 兜底：脚本异常或观察器没触发时，1.5 秒后把首屏内的内容放出来
+  setTimeout(() => {
+    items.forEach(el => {
+      if (el.getBoundingClientRect().top < innerHeight * 1.1) el.classList.add('in');
+    });
+  }, 1500);
+</script>
+</body>
+</html>

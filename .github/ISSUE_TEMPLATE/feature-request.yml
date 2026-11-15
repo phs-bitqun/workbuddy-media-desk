@@ -1,0 +1,43 @@
+name: 功能建议
+description: 想要新的风格卡、新的复盘维度、新的平台支持，提这里
+title: "[建议] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: want
+    attributes:
+      label: 你想要什么
+      description: 一句话说清，越具体越好
+      placeholder: 希望复盘页能按星期几看平均播放，判断固定发布时间
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      label: 为什么值得做
+      description: 你现在的做法是什么、哪一步最费劲
+    validations:
+      required: true
+
+  - type: textarea
+    id: workaround
+    attributes:
+      label: 现在怎么绕过去的
+      description: 手动算、导出到表格、或者干脆放弃——都可以写
+    validations:
+      required: false
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: 属于哪块
+      options:
+        - 成稿流程（策划案 / 正文 / 分镜）
+        - 风格卡与写作规则
+        - 排期与看板
+        - 数据复盘
+        - 安装与移植
+        - 其他
+    validations:
+      required: true

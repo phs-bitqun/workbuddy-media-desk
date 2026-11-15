@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 安装说明（先看这个）
+    url: https://github.com/phs-bitqun/workbuddy-media-desk/blob/main/INSTALL.md
+    about: 三条命令、常见问题、数据迁移和卸载，八成的安装问题这里能解决
+  - name: 在线介绍页
+    url: https://phs-bitqun.github.io/workbuddy-media-desk/
+    about: 看它长什么样、能干什么，再决定要不要装

@@ -1,7 +1,12 @@
 {
   "name": "workbuddy-media-desk",
-  "version": "1.0.0",
-  "description": "自媒体工作台（WorkBuddy 版）：一句话记灵感，一键成稿——口播脚本、标题、视频封面、配图和黑白线稿分镜。灵感墙、内容、排期、复盘、风格五页看板。移植自 woniuniuniu/dsh-media-desk（MIT）。",
+  "version": "1.1.0",
+  "description": "自媒体工作台：一句话记灵感，做出能发的口播脚本、封面大字和分镜，排期录数据，把有效做法沉淀成你自己的写作规则。移植自 woniuniuniu/dsh-media-desk（MIT）。",
+  "homepage": "https://phs-bitqun.github.io/workbuddy-media-desk/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/phs-bitqun/workbuddy-media-desk.git"
+  },
   "author": {
     "name": "蜗牛的科技笔记（原作）· WorkBuddy 移植版"
   },
@@ -18,5 +23,60 @@
     "排期",
     "复盘"
   ],
-  "skills": "./skills"
+  "license": "MIT",
+  "agents": [
+    "./agents/workbuddy-media-desk.md"
+  ],
+  "skills": [
+    "./skills/media-desk"
+  ],
+  "expertType": "agent",
+  "agentName": "workbuddy-media-desk",
+  "displayName": {
+    "en": "Content Desk",
+    "zh": "自媒体工作台"
+  },
+  "profession": {
+    "en": "Content Operations Editor",
+    "zh": "自媒体内容主编"
+  },
+  "displayDescription": {
+    "en": "Turns a one-line idea into a publishable script: hooks, cover copy, storyboard, scheduling and metrics review, then distils what worked into your own writing rules.",
+    "zh": "一句话记灵感，做出能发的口播脚本、封面和分镜，排期录数据，把有效做法沉淀成你自己的写作规则。"
+  },
+  "avatar": "avatars/expert.png",
+  "categoryId": "06-ContentCreative",
+  "defaultInitPrompt": {
+    "zh": "记个灵感：用 AI 做封面总像素材拼的",
+    "en": "Save this idea: AI-made covers always look like a pile of assets"
+  },
+  "plugin": "workbuddy-media-desk",
+  "tags": [
+    {
+      "en": "Short-video scripts",
+      "zh": "短视频脚本"
+    },
+    {
+      "en": "Cover and storyboard",
+      "zh": "封面与分镜"
+    },
+    {
+      "en": "Data review",
+      "zh": "数据复盘"
+    }
+  ],
+  "quickPrompts": [
+    {
+      "zh": "记个灵感：用 AI 做封面总像素材拼的",
+      "en": "Save this idea: AI-made covers always look like a pile of assets"
+    },
+    {
+      "zh": "把这周的抖音数据录一下，看看有什么规律",
+      "en": "This week's Douyin numbers are in — find the pattern behind them"
+    },
+    {
+      "zh": "把这条灵感做成口播脚本，走 AI 科技博主那个风格",
+      "en": "Turn this idea into a Douyin voiceover script in the AI tech blogger style"
+    }
+  ]
 }
