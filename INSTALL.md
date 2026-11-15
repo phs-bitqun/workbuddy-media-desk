@@ -134,6 +134,8 @@ node <同样的 desk.mjs 路径> render
 
 | 现象 | 原因与处理 |
 |---|---|
+| 脚本报「已存在，但不是 Git 仓库」 | 目标目录里有你自己的东西。**脚本不会删它**。按提示 `mv` 走或换 `MEDIA_DESK_SRC` 再跑 |
+| 脚本报「origin 不是这个项目」 | 目标是个别的 Git 仓库。确认要换掉就自己移走，脚本不会替你删 |
 | 专家里没有卡片 | 目录层级放错了。要的是 `plugins/workbuddy-media-desk/`，不是 `plugins/workbuddy-media-desk/workbuddy-media-desk/` 双层 |
 | `node: command not found` | 没装 Node 或版本低于 20 |
 | 说「工作台还没初始化」 | 先在对话里记一条灵感，或跑 `node desk.mjs init` |

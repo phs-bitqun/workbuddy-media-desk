@@ -16,6 +16,7 @@ import { computeInsights, proposeRules } from './lib/insights.mjs'
 import { draftFormat } from './lib/style.mjs'
 import { renderDesk } from './lib/render.mjs'
 import { exportProduction } from './lib/export.mjs'
+import { csvToMetrics } from './lib/csv.mjs'
 import { startServer } from './lib/server.mjs'
 
 /* ------------------------------ 参数解析 ------------------------------ */
@@ -451,29 +452,19 @@ const commands = {
     }
     if (sub === 'import') {
       const csv = await readInput()
-      const lines = csv.split(/\r?\n/).filter(line => line.trim())
-      if (!lines.length) fail('CSV 是空的')
-      const header = lines[0].split(',').map(s => s.trim().toLowerCase())
-      const rows = []
-      for (const line of lines.slice(1)) {
-        const cells = line.split(',').map(s => s.trim())
-        const row = Object.fromEntries(header.map((key, i) => [key, cells[i]]))
-        if (!row.platform) continue
-        rows.push({
-          id: `m_${Date.now().toString(36)}${rows.length}`,
-          itemId: row.itemid || row.item || undefined,
-          platform: row.platform,
-          date: parseDate(row.date) ?? new Date().toISOString(),
-          views: Number(row.views) || 0,
-          likes: Number(row.likes) || 0,
-          comments: Number(row.comments) || 0,
-          shares: Number(row.shares) || 0,
-          saves: Number(row.saves) || 0,
-        })
+      const { metrics, skipped, error } = csvToMetrics(csv)
+      if (error) fail(error)
+      await store.mutate('导入数据', draft => { draft.metrics.push(...metrics) })
+      if (wantsJson) return json({ imported: metrics.length, skipped })
+      say(`导入 ${metrics.length} 条数据`)
+      if (skipped.length) {
+        say(`跳过 ${skipped.length} 行：`)
+        for (const row of skipped.slice(0, 10)) say(`  第 ${row.line} 行：${row.reason}`)
+        if (skipped.length > 10) say(`  …另有 ${skipped.length - 10} 行`)
       }
-      if (!rows.length) fail('CSV 里没有能用的行（至少要有 platform 列）')
-      await store.mutate('导入数据', draft => { draft.metrics.push(...rows) })
-      return say(`导入 ${rows.length} 条数据`)
+      if (metrics.some(m => m.externalId)) say('其中带 externalId 的行按「累计数据」处理，同一内容的其它记录不再重复统计。')
+      else if (metrics.some(m => m.itemId)) say('提示：加上 externalId 列后，这些行会按累计数据优先，避免和手动记录重复计。')
+      return
     }
     if (sub === 'list') {
       if (wantsJson) return json(state.metrics)
@@ -525,7 +516,7 @@ const commands = {
     const state = await needState()
     const item = findItem(state, args[0] ?? '')
     if (!item.production) fail('这条还没有成稿')
-    const { dir, files } = await exportProduction(store, item, {
+    const { dir, files, reused } = await exportProduction(store, item, {
       dir: flags.dir && flags.dir !== true ? String(flags.dir) : undefined,
     })
     await store.mutate('记录导出路径', draft => {
@@ -533,8 +524,8 @@ const commands = {
       if (target.production) target.production.savedPath = dir
       return dir
     }, { undoable: false })
-    if (wantsJson) return json({ dir, files })
-    say(`已保存到：${dir}`)
+    if (wantsJson) return json({ dir, files, reused })
+    say(`已保存到：${dir}${reused ? '（上次的目录，已覆盖更新）' : ''}`)
     for (const file of files) say(`  ${file}`)
     if (!files.length) say('  （这条成稿还没有正文和图片）')
   },

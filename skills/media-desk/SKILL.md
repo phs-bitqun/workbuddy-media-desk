@@ -208,10 +208,14 @@ node "$DESK" schedule <id> --clear                         # 取消排期
 
 ```bash
 node "$DESK" metric add --platform 小红书 --item <id> --views 12000 --likes 800 --comments 60 --saves 300
-node "$DESK" metric import --file data.csv    # 列：platform,date,views,likes,comments,shares,saves[,itemId]
+node "$DESK" metric import --file data.csv    # 列：platform,date,views,likes,comments,shares,saves[,itemId,externalId]
 node "$DESK" insights
 node "$DESK" propose                          # 从数据里提炼规则提案
 ```
+
+导入后会打印跳过的行和原因（平台不认识、日期解析不出来、数字不是数）。**把这些原样告诉用户**——不要只报"导入 N 条"，坏行闷掉会让复盘数字不对而没人知道。
+
+`externalId` 列是「累计数据」标记：同一篇内容有带它的记录时，手动补录的记录会被排除。用户说"这个平台的数据我是整体导的"，就让他加这一列。
 
 `insights` 给总阅读、互动、互动率、平台分布、排行、日趋势。**如果输出里带「含示例数据」，说明还没录真实数据，别把它当结论。**
 
@@ -260,7 +264,9 @@ node "$DESK" stats     # 各状态条数 + 当前风格 + 体裁
 | `没有这个画面：image:4` | 序号从 0 起，且不能超过策划案里的数量 |
 | 图片在导出的文件夹里丢了 | `asset` 登记时文件没复制成功，或 `src` 指向的文件被删了 |
 | 看板里图片是空白 | `desk.html` 必须放在数据根目录，图片按 `files/` 相对路径引用 |
-| 复盘数字不对 | 同一篇内容既有导入数据又有手动数据会重复计；有 `externalId` 时只认导入那行 |
+| 复盘数字不对 | 同一篇内容既有导入数据又有手动数据会重复计；CSV 加 `externalId` 列后只认导入那行 |
+| `数据目录正被另一个进程写入` | 界面和终端同时在写。等几秒重试；确认没有别的进程就删 `~/.workbuddy/media-desk/.lock` |
+| 导入报"跳过 N 行" | 平台不在白名单、日期解析不出来、或指标不是数字。按提示改 CSV，别忽略 |
 
 ## 参考文档
 

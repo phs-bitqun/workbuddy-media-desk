@@ -16,6 +16,7 @@ import {
   addRule, fullImagePrompt,
 } from './ops.mjs'
 import { exportProduction } from './export.mjs'
+import { csvToMetrics } from './csv.mjs'
 import { renderDesk } from './render.mjs'
 
 const APP_DIR = join(dirname(fileURLToPath(import.meta.url)), '..', 'app')
@@ -220,30 +221,10 @@ async function handleApi(req, res, url, ctx) {
   if (resource === 'metrics' && method === 'POST') {
     const body = await readJson(req)
     if (body.csv) {
-      const lines = String(body.csv).split(/\r?\n/).filter(line => line.trim())
-      if (lines.length < 2) return json(res, 400, { error: 'CSV 至少要有表头和一行数据' })
-      const header = lines[0].split(',').map(s => s.trim().toLowerCase())
-      const rows = []
-      for (const line of lines.slice(1)) {
-        const cells = line.split(',').map(s => s.trim())
-        const row = Object.fromEntries(header.map((key, i) => [key, cells[i]]))
-        if (!row.platform) continue
-        const date = row.date ? new Date(row.date) : new Date()
-        rows.push({
-          id: `m_${Date.now().toString(36)}${rows.length}`,
-          itemId: row.itemid || row.item || undefined,
-          platform: row.platform,
-          date: (Number.isNaN(date.getTime()) ? new Date() : date).toISOString(),
-          views: Number(row.views) || 0,
-          likes: Number(row.likes) || 0,
-          comments: Number(row.comments) || 0,
-          shares: Number(row.shares) || 0,
-          saves: Number(row.saves) || 0,
-        })
-      }
-      if (!rows.length) return json(res, 400, { error: 'CSV 里没有能用的行' })
-      await store.mutate('导入数据', d => { d.metrics.push(...rows) })
-      return json(res, 200, { imported: rows.length })
+      const { metrics, skipped, error } = csvToMetrics(body.csv)
+      if (error) return json(res, 400, { error })
+      await store.mutate('导入数据', (d) => { d.metrics.push(...metrics) })
+      return json(res, 200, { imported: metrics.length, skipped })
     }
     if (!PLATFORMS.includes(body.platform)) return json(res, 400, { error: `平台只能是：${PLATFORMS.join(' / ')}` })
     const date = body.date ? new Date(body.date) : new Date()
@@ -414,7 +395,8 @@ export async function startServer({ store = new Store(), port = 4318, host = '12
 
   const listen = tryPort => new Promise((resolve, reject) => {
     const onError = err => { server.removeListener('listening', onOk); reject(err) }
-    const onOk = () => { server.removeListener('error', onError); resolve(tryPort) }
+    // 端口传 0 时由系统分配，回报真实端口
+    const onOk = () => { server.removeListener('error', onError); resolve(server.address()?.port ?? tryPort) }
     server.once('error', onError)
     server.once('listening', onOk)
     server.listen(tryPort, host)

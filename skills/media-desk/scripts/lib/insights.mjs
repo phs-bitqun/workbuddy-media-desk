@@ -114,16 +114,37 @@ export function computeInsights(state) {
 }
 
 /**
+ * 按「内容 × 平台」聚合。同一篇内容在不同平台的数据必须分开算，
+ * 否则会把 A 平台的播放量摊到条目上写的那个平台上。
+ */
+function platformUnits(metrics) {
+  const map = new Map()
+  for (const m of metrics) {
+    if (!m.platform) continue
+    // 没有关联内容的指标，每条自己算一个单位
+    const key = `${m.itemId ?? `row:${m.id}`}|${m.platform}`
+    const cur = map.get(key) ?? { platform: m.platform, views: 0, engaged: 0 }
+    cur.views += m.views || 0
+    cur.engaged += engagement(m)
+    map.set(key, cur)
+  }
+  return [...map.values()]
+}
+
+/**
  * 基于现有数据计算规则提案。只有样本足够才提案，不凑数。
  * @returns {Array<{name, rule, evidence, confidence, source}>}
  */
 export function proposeRules(state) {
   const proposals = []
-  const totals = itemTotals(countedMetrics(state))
+  const counted = countedMetrics(state)
+  const totals = itemTotals(counted)
   const published = state.items.filter(item => totals.has(item.id))
   const rows = published.map(item => ({ item, views: totals.get(item.id).views }))
 
-  const byPlatform = bestGroup(rows.filter(row => row.views > 0).map(row => ({ key: row.item.platform, value: row.views })))
+  // 平台表现按每条指标自己的平台算，不看条目上标的平台
+  const units = platformUnits(counted)
+  const byPlatform = bestGroup(units.filter(u => u.views > 0).map(u => ({ key: u.platform, value: u.views })))
   if (byPlatform.length >= 2 && byPlatform[0].avg > byPlatform[1].avg * 1.3) {
     const best = byPlatform[0]
     proposals.push({

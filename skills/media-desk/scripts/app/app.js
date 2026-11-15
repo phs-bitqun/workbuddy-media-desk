@@ -9,6 +9,7 @@ let active = localStorage.getItem('desk.tab') || null
 let search = ''
 let drawer = null      // { id, item, busy }
 let navEdit = null     // { title, nav }
+let metricEdit = null  // { platform, itemId, date, views, likes, comments, shares, saves }
 let calDate = new Date()
 let selDay = null
 let toastTimer = null
@@ -387,21 +388,20 @@ function bindShell() {
     } catch (err) { toast(err.message, true) }
   }))
 
-  document.getElementById('addMetric')?.addEventListener('click', () => {
-    const platform = prompt('平台（公众号/小红书/抖音/B站/视频号/TikTok/Instagram/YouTube/X）', S.settings?.platform ?? '小红书')
-    if (!platform) return
-    const views = prompt('阅读/播放量', '0')
-    if (views === null) return
-    const likes = prompt('点赞', '0') ?? '0'
-    const saves = prompt('收藏', '0') ?? '0'
-    api('/api/metrics', { method: 'POST', body: { platform, views: Number(views), likes: Number(likes), saves: Number(saves) } })
-      .then(refresh).then(() => toast('记下了')).catch(err => toast(err.message, true))
-  })
+  document.getElementById('addMetric')?.addEventListener('click', openMetricModal)
   document.getElementById('importCsv')?.addEventListener('click', () => {
-    const csv = prompt('粘 CSV，第一行表头：platform,date,views,likes,comments,shares,saves')
+    const csv = prompt('粘 CSV，第一行表头：platform,date,views,likes,comments,shares,saves[,itemId,externalId]')
     if (!csv) return
     api('/api/metrics', { method: 'POST', body: { csv } })
-      .then(r => refresh().then(() => toast(`导入 ${r.imported} 条`)))
+      .then(async (r) => {
+        await refresh()
+        const skipped = r.skipped ?? []
+        if (skipped.length) {
+          alert(`导入 ${r.imported} 条，跳过 ${skipped.length} 行：\n\n` +
+            skipped.slice(0, 12).map(s => `第 ${s.line} 行：${s.reason}`).join('\n') +
+            (skipped.length > 12 ? `\n…另有 ${skipped.length - 12} 行` : ''))
+        } else toast(`导入 ${r.imported} 条`)
+      })
       .catch(err => toast(err.message, true))
   })
 
@@ -620,7 +620,92 @@ function openNavEditor() {
 
 function closeNavEditor() { navEdit = null; renderModal() }
 
+function openMetricModal() {
+  const today = new Date()
+  metricEdit = {
+    platform: S.settings?.platform ?? '小红书',
+    itemId: '',
+    date: `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`,
+    views: '',
+    likes: '',
+    comments: '',
+    shares: '',
+    saves: '',
+  }
+  renderMetricModal()
+}
+
+function closeMetricModal() { metricEdit = null; renderMetricModal() }
+
+function renderMetricModal() {
+  if (!metricEdit) { if (!navEdit) modalRoot.innerHTML = ''; return }
+  const m = metricEdit
+  const platformOpts = S.meta.platforms.map(p => `<option value="${esc(p)}"${m.platform === p ? ' selected' : ''}>${esc(p)}</option>`).join('')
+  const itemOpts = ['<option value="">不关联具体内容</option>']
+    .concat(S.items.map(i => `<option value="${esc(i.id)}"${m.itemId === i.id ? ' selected' : ''}>${esc(i.title.slice(0, 28))}</option>`))
+    .join('')
+  const field = (key, label, placeholder = '0') => `<div class="field" style="flex:1;min-width:96px">
+    <label>${esc(label)}</label>
+    <input type="number" min="0" step="1" data-metric="${key}" value="${esc(m[key])}" placeholder="${esc(placeholder)}">
+  </div>`
+
+  modalRoot.innerHTML = `<div class="scrim"></div>
+  <div class="modal">
+    <header><strong>录一条数据</strong><button class="btn" id="mmClose">关闭</button></header>
+    <div class="body">
+      <div class="row">
+        <div class="field" style="flex:1;min-width:140px"><label>平台</label><select id="mmPlatform">${platformOpts}</select></div>
+        <div class="field" style="flex:1;min-width:140px"><label>日期</label><input type="date" id="mmDate" value="${esc(m.date)}"></div>
+      </div>
+      <div class="field"><label>关联到哪条内容（不关联就不进内容排行）</label><select id="mmItem">${itemOpts}</select></div>
+      <div class="row">
+        ${field('views', '阅读 / 播放')}
+        ${field('likes', '点赞')}
+        ${field('comments', '评论')}
+      </div>
+      <div class="row">
+        ${field('shares', '转发')}
+        ${field('saves', '收藏')}
+      </div>
+      <p class="hint">留空按 0 计。填了外链平台的累计数据时，建议用 CSV 导入并带 externalId，避免和手动记录重复统计。</p>
+    </div>
+    <footer>
+      <button class="btn" id="mmCancel">取消</button>
+      <button class="btn primary" id="mmSave">保存</button>
+    </footer>
+  </div>`
+
+  modalRoot.querySelector('.scrim').addEventListener('click', closeMetricModal)
+  document.getElementById('mmClose').addEventListener('click', closeMetricModal)
+  document.getElementById('mmCancel').addEventListener('click', closeMetricModal)
+  document.getElementById('mmSave').addEventListener('click', async () => {
+    const body = {
+      platform: document.getElementById('mmPlatform').value,
+      itemId: document.getElementById('mmItem').value || undefined,
+      date: document.getElementById('mmDate').value || undefined,
+      views: readNum('views'),
+      likes: readNum('likes'),
+      comments: readNum('comments'),
+      shares: readNum('shares'),
+      saves: readNum('saves'),
+    }
+    try {
+      await api('/api/metrics', { method: 'POST', body })
+      closeMetricModal()
+      await refresh()
+      toast('记下了')
+    } catch (err) { toast(err.message, true) }
+  })
+
+  function readNum(key) {
+    const el = modalRoot.querySelector(`[data-metric="${key}"]`)
+    const n = Number(el?.value)
+    return Number.isFinite(n) && n >= 0 ? n : 0
+  }
+}
+
 function renderModal() {
+  if (metricEdit) return renderMetricModal()
   if (!navEdit) { modalRoot.innerHTML = ''; return }
   const typeName = n => n.type === 'view'
     ? `筛选视图 · ${n.base === 'ideas' ? '灵感' : '内容'}${n.filter?.status ? ` · ${statusLabel(n.filter.status)}` : ''}${n.filter?.platform ? ` · ${n.filter.platform}` : ''}${n.filter?.tag ? ` · #${n.filter.tag}` : ''}`

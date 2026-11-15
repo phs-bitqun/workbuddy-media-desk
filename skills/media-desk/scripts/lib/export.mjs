@@ -1,5 +1,5 @@
 // 成稿导出：把一篇成稿存成一个文件夹。CLI 和本地服务共用。
-import { copyFile, mkdir, writeFile } from 'node:fs/promises'
+import { copyFile, mkdir, readdir, writeFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { extname, join, resolve } from 'node:path'
 import { homedir } from 'node:os'
@@ -15,16 +15,38 @@ export function defaultExportDir(title) {
 }
 
 /**
+ * 挑一个不会踩掉别人文件的导出目录。
+ * 顺序：本条目上次导出过就还存那儿 → 默认目录空着就用 → 否则加条目后缀避开同名。
+ */
+async function pickDir(item, title) {
+  const saved = item.production?.savedPath
+  if (saved && existsSync(saved)) return { dir: saved, reused: true }
+
+  const base = defaultExportDir(title)
+  if (!existsSync(base)) return { dir: base, reused: false }
+  const entries = await readdir(base).catch(() => [])
+  if (!entries.length) return { dir: base, reused: false }
+
+  // 同一标题的另一篇内容：带上条目尾号，避免互相覆盖
+  const tail = String(item.id ?? '').replace(/[^A-Za-z0-9]/g, '').slice(-4) || 'copy'
+  const variant = `${base}-${tail}`
+  if (!existsSync(variant)) return { dir: variant, reused: false }
+  const stamped = `${variant}-${Date.now().toString(36).slice(-5)}`
+  return { dir: stamped, reused: false }
+}
+
+/**
  * 写出正文、分镜脚本和全部图片。
  * @param {{root: string}} store - 数据根目录（图片在 root/files 下）。
  * @param {object} item - 条目，取 production。
  * @param {{dir?: string}} [options]
- * @returns {Promise<{dir: string, files: string[]}>}
+ * @returns {Promise<{dir: string, files: string[], reused: boolean}>}
  */
 export async function exportProduction(store, item, { dir } = {}) {
   const p = item.production
   if (!p) throw new Error('这条还没有成稿')
-  const outDir = dir ? resolve(dir) : defaultExportDir(p.title)
+  const picked = dir ? { dir: resolve(dir), reused: false } : await pickDir(item, p.title)
+  const outDir = picked.dir
   await mkdir(outDir, { recursive: true })
   const written = []
 
@@ -54,5 +76,5 @@ export async function exportProduction(store, item, { dir } = {}) {
   for (const [i, image] of (p.images ?? []).entries()) await copy(image, `配图${i + 1}`)
   for (const shot of p.shots ?? []) await copy(shot, `分镜${shot.no}`)
 
-  return { dir: outDir, files: written }
+  return { dir: outDir, files: written, reused: picked.reused }
 }

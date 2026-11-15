@@ -29,14 +29,44 @@ NODE_MAJOR="$(node -p 'process.versions.node.split(".")[0]')"
 info "Node $(node -v) ✓"
 
 # --- 取代码 ---
-if [ -d "$SRC/.git" ]; then
-  info "已有源码，拉取更新"
-  git -C "$SRC" pull --ff-only --quiet || info "更新失败，继续用本地版本"
+# 任何情况下都不删用户已有的目录：不是我们克隆的就停下来让人自己处理。
+case "$SRC" in
+  /|"$HOME"|"$HOME/"|"") die "MEDIA_DESK_SRC 指向了不该动的目录：$SRC" ;;
+esac
+
+if [ -e "$SRC" ]; then
+  if [ -d "$SRC/.git" ]; then
+    ORIGIN="$(git -C "$SRC" remote get-url origin 2>/dev/null || true)"
+    case "$ORIGIN" in
+      *workbuddy-media-desk*) : ;;
+      *) die "$SRC 已经是个 Git 仓库，但 origin 不是这个项目：
+      ${ORIGIN:-（没有 origin）}
+    确认要换掉它，请自己移走再重跑；我不会替你删。" ;;
+    esac
+    info "已有源码，拉取更新"
+    git -C "$SRC" pull --ff-only --quiet || info "更新失败，继续用本地版本"
+  else
+    die "$SRC 已存在，但不是 Git 仓库。我没有删它，也不会删。
+    它可能是你解压的源码或别的什么，请自己处理：
+      移走：  mv \"$SRC\" \"$SRC.bak-$(date +%s)\"
+      换位置：MEDIA_DESK_SRC=/某个空目录 再跑一次
+    然后重试。"
+  fi
 else
   info "克隆到 $SRC"
   mkdir -p "$(dirname "$SRC")"
-  rm -rf "$SRC"
-  git clone --depth 1 --quiet "$REPO" "$SRC"
+  # 先克隆到旁边的临时目录，验证完整后再换上去，避免半截目录占坑
+  TMP="$SRC.clone-$$"
+  rm -rf "$TMP"
+  if ! git clone --depth 1 --quiet "$REPO" "$TMP"; then
+    rm -rf "$TMP"
+    die "克隆失败。检查网络，或用 MEDIA_DESK_REPO 指定镜像地址。"
+  fi
+  if [ ! -f "$TMP/skills/media-desk/scripts/desk.mjs" ]; then
+    rm -rf "$TMP"
+    die "克隆下来的内容不完整，缺少 skills/media-desk/scripts/desk.mjs"
+  fi
+  mv "$TMP" "$SRC"
 fi
 
 SKILL_DIR="$SRC/skills/media-desk"

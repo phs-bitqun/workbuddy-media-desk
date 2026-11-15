@@ -166,6 +166,7 @@ workbuddy-media-desk/             # the whole folder is the distributable packag
 │       ├── app/                  # interface: index.html + app.css + app.js
 │       └── lib/                  # store / ops / insights / render / server / export
 ├── install.sh                    # one-step installer for the skill route
+├── tests/                        # node --test, 47 tests, zero dependencies
 ├── docs/                         # screenshots and the landing page
 ├── .github/ISSUE_TEMPLATE/       # install problem / feature request
 ├── INSTALL.md · README.md · LICENSE
@@ -192,8 +193,26 @@ Carried over verbatim: **the 15 creator presets**, **the brief / draft / revise 
 - **No publishing.** No platform offers a unified API. You export a folder and post it yourself.
 - **The interface does not generate.** Writing and drawing need a model; go back to the conversation.
 - **The interface is a local server**, not a sidebar panel. It stops with the terminal; it does not run in the background (launchd can fix that if you want it).
-- **No account import.** Review data comes from manual entry or CSV.
+- **No account import.** Review data comes from manual entry or CSV. Add an `externalId` column to mark rows as cumulative, otherwise imported and manual rows for the same post are both counted.
 - **Chinese only.** The upstream bilingual support was not ported.
+
+## Reliability
+
+These exist because each one bit us once:
+
+- **Concurrent writers don't lose data.** The CLI, the interface and two terminals share one `state.json`; writes are serialised through a `.lock` in the data directory, and the state is re-read after taking the lock. Tested with 20 concurrent processes — all 20 entries survived (before the fix, 1 did).
+- **The installer never deletes your directories.** If the target exists and is not a Git clone of this project, it stops and tells you what to do.
+- **Same-title exports don't overwrite each other.** Two posts with the same title get two folders; re-exporting the same post returns to its own folder and says so.
+- **Files are 0600, directories 0700**, regardless of your umask.
+- **Bad CSV rows are reported** with line numbers and reasons, instead of silently turning a broken date into today.
+
+## Tests
+
+```bash
+node --test tests/*.test.mjs
+```
+
+47 tests, zero dependencies, Node's built-in runner. Covers cross-process writes, lock takeover, file modes, the installer's refusal paths, CSV parsing (BOM/quotes/bad rows), platform grouping, cumulative-data dedupe, export collisions, and HTTP auth plus path traversal.
 
 ## Feedback
 

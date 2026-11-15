@@ -1,6 +1,6 @@
 {
   "name": "workbuddy-media-desk",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "自媒体工作台：一句话记灵感，做出能发的口播脚本、封面大字和分镜，排期录数据，把有效做法沉淀成你自己的写作规则。带本地交互界面，菜单栏可自定义。移植自 woniuniuniu/dsh-media-desk（MIT）。",
   "homepage": "https://phs-bitqun.github.io/workbuddy-media-desk/",
   "repository": {
