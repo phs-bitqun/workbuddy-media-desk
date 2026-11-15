@@ -20,18 +20,39 @@
 
 ## 装
 
-```bash
-ln -s /Users/phs/WorkBuddy/2026-11-15-10-01-23/workbuddy-media-desk/skills/media-desk \
-      ~/.workbuddy/skills/media-desk
+### 方式一：一句话提示词（推荐）
+
+把下面这段整段粘给 WorkBuddy 的新会话，它自己装：
+
+```
+帮我安装自媒体工作台技能：把 https://github.com/phs-bitqun/workbuddy-media-desk 克隆到 ~/.workbuddy/media-desk-src，再把 ~/.workbuddy/skills/media-desk 软链接到它的 skills/media-desk，验证 scripts/desk.mjs 的 doctor 能跑通，最后提醒我重启；不要动 ~/.workbuddy/media-desk/ 里的数据。
 ```
 
-重启 WorkBuddy，之后说「记个灵感」「把这条做成口播脚本」就会命中。
-
-卸载：
+### 方式二：一行命令
 
 ```bash
-rm ~/.workbuddy/skills/media-desk      # 只删链接
-rm -rf ~/.workbuddy/media-desk         # 再删数据（你的内容，删了就没了）
+curl -fsSL https://raw.githubusercontent.com/phs-bitqun/workbuddy-media-desk/main/install.sh | bash
+```
+
+脚本会检查 Node ≥ 20，克隆到 `~/.workbuddy/media-desk-src`，软链接挂到 `~/.workbuddy/skills/media-desk`，然后跑一次自检。重复执行是安全的：已有源码走 `git pull`。
+
+### 方式三：手工
+
+```bash
+git clone https://github.com/phs-bitqun/workbuddy-media-desk.git ~/.workbuddy/media-desk-src
+ln -sfn ~/.workbuddy/media-desk-src/skills/media-desk ~/.workbuddy/skills/media-desk
+```
+
+软链的好处是 `git pull` 一次就全线更新，不用重装。装完重启 WorkBuddy（技能列表在启动时扫描），之后说「记个灵感」「把这条做成口播脚本」就会命中。
+
+### 更新与卸载
+
+```bash
+git -C ~/.workbuddy/media-desk-src pull           # 更新
+
+rm ~/.workbuddy/skills/media-desk                  # 卸载：只删链接
+rm -rf ~/.workbuddy/media-desk-src                 # 再删源码
+rm -rf ~/.workbuddy/media-desk                     # 数据要删自己动手，脚本不会碰
 ```
 
 ## 怎么用
